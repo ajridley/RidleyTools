@@ -115,7 +115,7 @@ try:
 		else:
 			AddMsgAndPrint("Selected file is not an MXD")
 	elif os.path.isdir(input):
-		logFile = os.path.join(input,(os.path.dirname(input)+"_MXDLinkReport_" + startTime.strftime("%Y%m%d") + ".txt"))
+		logFile = os.path.join(input,(os.path.basename(input)+"_MXDLinkReport_" + startTime.strftime("%Y%m%d") + ".txt"))
 		AddMsgAndPrint(logFile)
 		with open(logFile, 'w') as f:
 			f.write("Report for: " + input + "\n\n")

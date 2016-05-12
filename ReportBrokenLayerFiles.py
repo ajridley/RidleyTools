@@ -35,27 +35,32 @@ try:
 	for dirpath, dirnames, filenames in walk:
 		for filename in filenames:
 			fullpath = os.path.join(dirpath, filename)
-			lyr = arcpy.mapping.Layer(fullpath)
-			#Test for broken links and iterate through broken items in layerfile
-			brknList = arcpy.mapping.ListBrokenDataSources(lyr)
-			for brknItem in brknList:
-				AddMsgAndPrint("BROKEN: " + brknItem.name + " at " + brknItem.dataSource)
-				#Parse broken data source with FixLinks.SortPath
-				foundPath = SortPath(brknItem.dataSource, Quiet = True)
-				#Test SortPath results and append to appropriate list
-				if foundPath == "No match":
-					noMatchLayers.append(fullpath)
-				elif foundPath == "U: drive" or foundPath == "Q: drive":
-					troubleLayers.append(fullpath)
-				elif foundPath != None:
-					fixLayers.append(fullpath)
-					#Test for fix input from user
-					if boolFix == True:
-						#Replace datasource and add to fixedLayers if successful
-						lyr.replaceDataSource(foundPath, "NONE",'#',validate = True)
-						if len(arcpy.GetMessages(2)) == 0:
-							fixedLayers.append(fullpath)
-				brknNum += 1
+			desc = arcpy.Describe(fullpath)
+			if hasattr(desc, "layer"):
+				lyr = arcpy.mapping.Layer(fullpath)
+				#Test for broken links and iterate through broken items in layerfile
+				brknList = arcpy.mapping.ListBrokenDataSources(lyr)
+				for brknItem in brknList:
+					AddMsgAndPrint("BROKEN: " + brknItem.name + " at " + brknItem.dataSource)
+					#Parse broken data source with FixLinks.SortPath
+					foundPath = SortPath(brknItem.dataSource, Quiet = True)
+					#Test SortPath results and append to appropriate list
+					if foundPath == "No match":
+						noMatchLayers.append(fullpath)
+					elif foundPath == "U: drive" or foundPath == "Q: drive":
+						troubleLayers.append(fullpath)
+					elif foundPath != None:
+						fixLayers.append(fullpath)
+						#Test for fix input from user
+						if boolFix == True:
+							#Replace datasource and add to fixedLayers if successful
+							lyr.replaceDataSource(foundPath, "NONE",'#',validate = True)
+							if len(arcpy.GetMessages(2)) == 0:
+								fixedLayers.append(fullpath)
+					brknNum += 1
+			elif hasattr(desc, "dataType"):
+				AddMsgAndPrint(desc.dataType) 
+				troubleLayers.append(fullpath)
 			totalFiles += 1
 	##Output results
 	#Print messages to console and GP dialog
